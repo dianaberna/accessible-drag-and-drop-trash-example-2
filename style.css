@@ -1,0 +1,282 @@
+/* state colors */
+:root {
+    --droptarget-background: #fff;
+    --droptarget-border: #cdcdcd;
+    --droptarget-color: #666;
+
+    --dragitem-background: #eee;
+    --dragitem-border: #888;
+    --dragitem-color: #555;
+
+    --valid-background: #efe;
+    --valid-border: #080;
+    --valid-color: #080;
+
+    --active-background: #def;
+    --active-border: #06f;
+    --active-color: #06f;
+
+    --selected-background: #06f;
+    --selected-border: #06f;
+    --selected-color: #fff;
+}
+
+/* essential system colors */
+@media (forced-colors: active) {
+    :root {
+        --dragitem-background: ButtonFace;
+        --dragitem-border: ButtonBorder;
+        --dragitem-color: ButtonText;
+
+        --active-border: Highlight;
+
+        --selected-background: Highlight;
+        --selected-border: Highlight;
+        --selected-color: HighlightText;
+    }
+    /* nb. Chrome and Edge don't support AccentColor, but using unset or initial
+       for outline-color applies the theme text color, not its outline color
+       however they do support Highlight, and in Windows contrast themes
+       it's the same color as AccentColor, however in MacOS forced-color modes
+       Highlight has some alpha-channel transparency while AccentColor is opaque
+       which means that using Highlight in that situation would be less visible
+       so this arrangement will apply AccentColor if it's supported
+       or fall back to Highlight color otherwise, which is acceptable */
+    @supports (outline-color: AccentColor) {
+        :root {
+            --active-border: AccentColor;
+        }
+    }
+}
+
+/***/
+
+/* containers
+   nb. max-height and overflow-y can be used if required
+   however that should be avoided for better usability */
+[data-drag-act="droptarget"] {
+    background: var(--droptarget-background);
+    border: 3px double;
+    border-color: var(--droptarget-border);
+    border-radius: 12px;
+    color: var(--droptarget-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* containers : directly focused / focus-within
+   nb. `.focus-within` is a polyfill for `:focus-within` */
+[data-drag-act="droptarget"]:focus,
+[data-drag-act="droptarget"].focus-within {
+    border-color: var(--active-border);
+    border-style: solid;
+    color: var(--active-color);
+    outline: none;
+}
+
+/* containers : default ((no items are selected anywhere)) */
+[data-drag-act="droptarget"]:not([data-drag-valid]) {
+}
+
+/* containers : interactive ((items are selected somewhere)) */
+[data-drag-act="droptarget"][data-drag-valid] {
+}
+
+/* containers : non-target ((items are selected here)) */
+[data-drag-act="droptarget"][data-drag-valid="false"] {
+}
+
+/* containers : non-target : items have been dragged out / focus is elsewhere */
+[data-drag-act="droptarget"][data-drag-valid="false"].dragout {
+    filter: grayscale();
+    opacity: 0.5;
+}
+
+/* containers : valid target ((items can be dropped here, no items are selected here)) */
+[data-drag-act="droptarget"][data-drag-valid="true"] {
+    background-color: var(--valid-background);
+    border-color: var(--valid-border);
+    border-style: dashed;
+    color: var(--valid-color);
+}
+
+/* containers : valid target : directly focused */
+[data-drag-act="droptarget"][data-drag-valid="true"]:focus {
+    outline: 2px solid;
+    outline-color: var(--active-border);
+    outline-offset: 2px;
+}
+
+/* containers : valid target : directly focused / focus-within / hovered */
+[data-drag-act="droptarget"][data-drag-valid="true"]:focus,
+[data-drag-act="droptarget"][data-drag-valid="true"].focus-within,
+[data-drag-act="droptarget"][data-drag-valid="true"]:hover,
+[data-drag-act="droptarget"][data-drag-valid="true"].dragover {
+    background-color: var(--active-background);
+    border-color: var(--active-border);
+    border-style: solid;
+    color: var(--active-color);
+}
+
+/***/
+
+/* container labels
+   nb. these should be visible, but they can be visually-hidden
+   however they mustn't be actually hidden, eg. by display or visibility */
+[data-drag-act="label"] {
+    background: var(--droptarget-background);
+    border-color: var(--droptarget-border);
+    border-radius: 9px 9px 0 0;
+    border-style: inherit;
+    border-width: 0 0 3px 0;
+    color: inherit;
+    font-size: 1.2rem;
+    font-weight: normal;
+    line-height: 1.2;
+    margin: 0;
+    padding: 0.55rem 0.7rem;
+}
+
+/* nb. these three selectors handle forced-color inheritance issues in Firefox
+   where `border-color:inherit` inherits from `color` rather than `border-color` */
+
+/* [containers : valid target] > container labels */
+[data-drag-act="droptarget"][data-drag-valid="true"] > [data-drag-act="label"] {
+    border-color: var(--valid-border);
+}
+
+/* [containers : directly focused / focus-within] > container labels */
+[data-drag-act="droptarget"]:focus > [data-drag-act="label"],
+[data-drag-act="droptarget"].focus-within > [data-drag-act="label"] {
+    border-color: var(--active-border);
+}
+
+/* [containers : valid target : hovered] > container labels */
+[data-drag-act="droptarget"][data-drag-valid="true"]:hover > [data-drag-act="label"],
+[data-drag-act="droptarget"][data-drag-valid="true"].dragover > [data-drag-act="label"] {
+    border-color: var(--active-border);
+}
+
+/***/
+
+/* insertion parent */
+[data-drag-act="parent"] {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/***/
+
+/* items */
+[data-drag-act="dragitem"] {
+    background: var(--dragitem-background);
+    border: 2px solid;
+    border-color: var(--dragitem-border);
+    border-radius: 4px;
+    color: var(--dragitem-color);
+    font-size: 1rem;
+    line-height: 1.2;
+    list-style: none;
+    margin: 0.45rem;
+    padding: 0.45rem 0.5rem;
+}
+@media (forced-colors: active) {
+    [data-drag-act="dragitem"] {
+        /* <https://www.gwhitworth.com/posts/2019/high-contrast-text-backplate/> */
+        forced-color-adjust: none;
+    }
+}
+
+/* items : insertion animation effect
+   nb. this can't use anything that removes it from the accessibility tree
+   eg. it can't use display or visibility, but it can use opacity or transform */
+@media (prefers-reduced-motion: no-preference) {
+    [data-drag-act="dragitem"] {
+        opacity: 1;
+        transition: opacity 0.05s;
+        position: relative;
+    }
+    [data-drag-act="dragitem"].insertion {
+        opacity: 0;
+    }
+}
+
+/* items : pointer active
+   nb. this stops dragitem longpress causing text-selection
+   because it produces conflicting interface hints in iOS
+   the blue text-selection bars appear on top of the item
+   at the same time as it enters the draggable state
+   nb. defining this on :active so it's not a permanent block
+   eg. Ctrl + A or encompassing range selections still work */
+[data-drag-act="dragitem"]:active {
+    -webkit-user-select: none;
+}
+
+/* items : declaratively or programmatically unavailable */
+[data-drag-act="dragitem"][aria-disabled="true"] {
+    filter: grayscale();
+    opacity: 0.3;
+}
+
+/* items : activedescendant when programmatically available or declaratively unavailable */
+[data-drag-act="droptarget"]:not([data-drag-valid="true"]):focus [data-drag-act="dragitem"].activedescendant {
+    outline: 2px solid;
+    outline-color: var(--active-border);
+    outline-offset: 2px;
+}
+
+/* items : checked or selected */
+[data-drag-act="dragitem"][aria-checked="true"],
+[data-drag-act="dragitem"][aria-selected="true"] {
+    background-color: var(--selected-background);
+    border-color: var(--selected-border);
+    color: var(--selected-color);
+}
+
+/* items > checkmark and radio icons */
+[data-drag-act="dragitem"][aria-checked]::before {
+    background: currentColor;
+    content: "";
+    display: inline-block;
+    height: 0.8rem;
+    margin: 0 0.55rem 0 0;
+    position: absolute;
+    top: 0.5rem;
+    width: 0.8rem;
+}
+[data-drag-act="dragitem"][aria-checked="false"]::before {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M28 0h-24c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h24c2.2 0 4-1.8 4-4v-24c0-2.2-1.8-4-4-4zM28 28h-24v-24h24v24z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M28 0h-24c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h24c2.2 0 4-1.8 4-4v-24c0-2.2-1.8-4-4-4zM28 28h-24v-24h24v24z"/></svg>');
+}
+[data-drag-act="dragitem"][aria-checked="true"]::before {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M28 0h-24c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h24c2.2 0 4-1.8 4-4v-24c0-2.2-1.8-4-4-4zM14 24.828l-7.414-7.414 2.828-2.828 4.586 4.586 9.586-9.586 2.828 2.828-12.414 12.414z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M28 0h-24c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h24c2.2 0 4-1.8 4-4v-24c0-2.2-1.8-4-4-4zM14 24.828l-7.414-7.414 2.828-2.828 4.586 4.586 9.586-9.586 2.828 2.828-12.414 12.414z"/></svg>');
+}
+[data-drag-act="dragitem"][role="radio"][aria-checked="false"]::before {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 28c-6.627 0-12-5.373-12-12s5.373-12 12-12c6.627 0 12 5.373 12 12s-5.373 12-12 12z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 28c-6.627 0-12-5.373-12-12s5.373-12 12-12c6.627 0 12 5.373 12 12s-5.373 12-12 12z"/></svg>');
+}
+[data-drag-act="dragitem"][role="radio"][aria-checked="true"]::before {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 28c-6.627 0-12-5.373-12-12s5.373-12 12-12c6.627 0 12 5.373 12 12s-5.373 12-12 12zM10 16c0-3.314 2.686-6 6-6s6 2.686 6 6c0 3.314-2.686 6-6 6s-6-2.686-6-6z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg aria-hidden="true" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 28c-6.627 0-12-5.373-12-12s5.373-12 12-12c6.627 0 12 5.373 12 12s-5.373 12-12 12zM10 16c0-3.314 2.686-6 6-6s6 2.686 6 6c0 3.314-2.686 6-6 6s-6-2.686-6-6z"/></svg>');
+}
+
+/***/
+
+/* hidden elements */
+[data-drag-act="droptarget"] [hidden] {
+    display: none;
+}
+
+/* live announcement elements for VoiceOver
+   nb. these must be displayed and visually-hidden or they won't work */
+[data-drag-act="description"]:not([hidden]) {
+    clip-path: inset(50%);
+    display: block;
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
