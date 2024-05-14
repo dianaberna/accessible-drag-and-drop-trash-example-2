@@ -31,7 +31,7 @@
       background: #fff;
       color: #000;
       margin: 0;
-      margin-top: 5rem;
+      margin-top: 2rem;
       min-width: 20rem;
       padding: 1rem;
     }
@@ -45,7 +45,11 @@
     .trash{
       position: absolute;
       right: 2rem;
-      z-index: 2;
+      z-index: 0;
+    }
+
+    [data-drag-act="parent"]{
+      display: flex;
     }
   </style>
 </head>
